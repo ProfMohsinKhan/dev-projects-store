@@ -3,6 +3,8 @@ import { collection, getDocs } from "firebase/firestore";
 import Link from "next/link";
 import { ArrowRight, Terminal } from "lucide-react";
 
+
+export const revalidate = 60; // Revalidate every 60 seconds
 // Server-side function to fetch projects (Best for SEO)
 async function getProjects() {
   const projectsCol = collection(db, "projects");

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, CheckCircle2, ShoppingCart, PlaySquare } from "lucide-react";
 import { Metadata } from "next";
 
+export const revalidate = 60;
 // Helper to extract YouTube ID for embed
 function getYouTubeEmbedUrl(url: string) {
   if (!url) return null;
