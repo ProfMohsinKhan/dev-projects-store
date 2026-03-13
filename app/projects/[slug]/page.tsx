@@ -119,7 +119,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             <div className="mb-6">
               <span className="text-slate-500 text-sm font-semibold uppercase tracking-wider">One-time payment</span>
               <div className="text-5xl font-extrabold text-slate-900 mt-2">
-                ${project.price}
+                ₹{project.price}
               </div>
             </div>
 
