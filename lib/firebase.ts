@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth"; // Ye line add karni hai
 
 // TODO: Replace this with your actual Firebase project config
 const firebaseConfig = {
@@ -14,5 +15,5 @@ const firebaseConfig = {
 // Next.js hot-reload issues ko prevent karne ke liye check karte hain
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
-
-export { db };
+const auth = getAuth(app); // Ye line add karni hai
+export { db ,auth};
