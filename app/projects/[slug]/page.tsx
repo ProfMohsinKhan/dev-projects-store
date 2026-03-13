@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!project) return { title: 'Project Not Found' };
 
   return {
-    title: `${project.title} | Source Code`,
+    title: `₹{project.title} | Source Code`,
     description: project.shortDescription,
     keywords: project.techStack?.join(", ") + ", final year project, source code",
   };
