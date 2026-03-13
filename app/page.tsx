@@ -52,7 +52,7 @@ export default async function Home() {
                     {project.title}
                   </h3>
                   <span className="bg-blue-50 text-blue-700 text-lg font-bold px-3 py-1 rounded-full">
-                    ${project.price}
+                    ₹{project.price}
                   </span>
                 </div>
                 
