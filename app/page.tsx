@@ -1,7 +1,8 @@
 import { db } from "../lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import Link from "next/link";
-import { ArrowRight, Terminal, Tag, Zap } from "lucide-react";
+import { ArrowRight, Terminal, Zap, Flame } from "lucide-react"; // Flame icon add kiya hai
+import RequestSection from "../components/RequestSection"; 
 
 export const revalidate = 60;
 
@@ -46,7 +47,6 @@ export default async function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((project: any) => {
-            // Calculate Discount Percentage
             const discount = project.originalPrice 
               ? Math.round(((project.originalPrice - project.price) / project.originalPrice) * 100) 
               : 0;
@@ -84,7 +84,8 @@ export default async function Home() {
                 </div>
 
                 <div className="p-6 flex-grow">
-                  <div className="flex items-center gap-2 mb-3">
+                  {/* Difficulty & Downloads Row */}
+                  <div className="flex items-center justify-between mb-3">
                     <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${
                       project.difficulty === 'Advanced' ? 'bg-red-50 text-red-600 border-red-100' : 
                       project.difficulty === 'Beginner' ? 'bg-green-50 text-green-600 border-green-100' : 
@@ -92,6 +93,13 @@ export default async function Home() {
                     }`}>
                       {project.difficulty || 'Intermediate'}
                     </span>
+
+                    {/* 🔥 NAYA UPDATE: Downloads Count Badge */}
+                    {project.downloadsCount > 0 && (
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-100 uppercase tracking-wider">
+                        <Flame className="w-3 h-3" /> {project.downloadsCount}+ Downloads
+                      </span>
+                    )}
                   </div>
 
                   <h3 className="text-xl font-bold text-slate-900 leading-tight mb-3 group-hover:text-blue-600 transition-colors">
@@ -132,6 +140,9 @@ export default async function Home() {
           })}
         </div>
       </section>
+
+    
+      
     </main>
   );
 }

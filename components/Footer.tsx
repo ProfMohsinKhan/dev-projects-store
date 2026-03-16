@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Code2 } from "lucide-react";
+import { Code2, Mail, MapPin } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -15,7 +15,7 @@ export default function Footer() {
                 Dev<span className="text-blue-500">Store</span>
               </span>
             </div>
-            <p className="text-sm text-slate-400 mb-4">
+            <p className="text-sm text-slate-400 mb-4 leading-relaxed">
               Premium ready-made final year projects, complete with documentation and source code download for engineering and computer science students.
             </p>
           </div>
@@ -42,21 +42,37 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* SEO Category 3: Buyer Intent Keywords */}
+          {/* 🔥 NAYA UPDATE: Support, Legal & Contact */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="#" className="hover:text-blue-400 transition-colors">Buy final year project</Link></li>
-              <li><Link href="#" className="hover:text-blue-400 transition-colors">Project report and documentation</Link></li>
-              <li><Link href="#" className="hover:text-blue-400 transition-colors">College project with source code</Link></li>
-              <li><Link href="#" className="hover:text-blue-400 transition-colors">Mini project for computer science</Link></li>
+            <h3 className="text-white font-semibold mb-4">Support & Legal</h3>
+            <ul className="space-y-2 text-sm mb-6">
+              <li><Link href="/contact" className="hover:text-blue-400 transition-colors">Contact Us</Link></li>
+              <li><Link href="/terms" className="hover:text-blue-400 transition-colors">Terms & Conditions</Link></li>
+              <li><Link href="/refund" className="hover:text-blue-400 transition-colors">Refund & Cancellation Policy</Link></li>
+              <li><Link href="/privacy" className="hover:text-blue-400 transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/request" className="hover:text-blue-400 transition-colors font-bold text-blue-500">Request Custom Project</Link></li>
             </ul>
+
+            <div className="space-y-3 text-sm text-slate-400">
+              <p className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                <span>Shop No. 01, Commercial Orchid Bldg, Next to Laxmi Park, Beverly Park, Mira Road (E), Thane - 401107</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-blue-500 shrink-0" />
+                <span>mohsin.mohsin6@gmail.com</span>
+              </p>
+            </div>
           </div>
 
         </div>
         
-        <div className="border-t border-slate-800 pt-8 text-center text-sm text-slate-500">
-          <p>© {new Date().getFullYear()} DevStore by Mohsin Khan. All rights reserved.</p>
+        <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+          <p>© {new Date().getFullYear()} Alley Solutions / DevStore. All rights reserved.</p>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            All systems operational
+          </div>
         </div>
       </div>
     </footer>

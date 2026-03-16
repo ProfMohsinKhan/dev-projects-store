@@ -2,7 +2,7 @@ import { db } from "@/lib/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CheckCircle2, ShoppingCart, PlaySquare, Clock, ShieldCheck, Tag } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ShoppingCart, PlaySquare, Clock, ShieldCheck, Tag, Flame, Users } from "lucide-react"; // Naye icons import kiye
 import { Metadata } from "next";
 
 export const revalidate = 60;
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!project) return { title: 'Project Not Found' };
 
   return {
-    title: `${project.title} | Source Code`,
+    title: `${project.title} | Download Source Code`,
     description: project.shortDescription,
   };
 }
@@ -44,12 +44,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   const embedUrl = getYouTubeEmbedUrl(project.youtubeUrl);
   
-  // DISCOUNT LOGIC
   const discount = project.originalPrice 
     ? Math.round(((project.originalPrice - project.price) / project.originalPrice) * 100) 
     : 0;
 
-  // SAFE ARRAY LOGIC: Agar whatsIncluded string hai toh array banayega, warna empty array
   const includedItems = Array.isArray(project.whatsIncluded) 
     ? project.whatsIncluded 
     : typeof project.whatsIncluded === 'string'
@@ -58,15 +56,17 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   return (
     <main className="min-h-screen bg-gray-50 pb-20">
-      {/* Top Nav */}
+      {/* Breadcrumb Navigation */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors">
+          <Link href="/" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-blue-600">
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to Store
           </Link>
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest hidden md:block">
-            {project.category || "Project"} / {project.title}
-          </span>
+          <div className="hidden md:flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
+            <span>{project.category || "Project"}</span>
+            <span>/</span>
+            <span className="text-slate-900">{project.title}</span>
+          </div>
         </div>
       </div>
 
@@ -75,14 +75,25 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         {/* LEFT COLUMN */}
         <div className="lg:col-span-2 space-y-8">
           <div>
-            <div className="flex items-center gap-3 mb-4">
-               <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+               <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-tighter border ${
                   project.difficulty === 'Advanced' ? 'bg-red-50 text-red-600 border-red-100' : 
                   project.difficulty === 'Beginner' ? 'bg-green-50 text-green-600 border-green-100' : 
                   'bg-blue-50 text-blue-600 border-blue-100'
                 }`}>
                   {project.difficulty || 'Intermediate'} Level
                 </span>
+                
+                <span className="text-slate-400 text-xs font-medium flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> Updated recently
+                </span>
+
+                {/* 🔥 NAYA UPDATE: Top Header Download Badge */}
+                {project.downloadsCount > 0 && (
+                  <span className="flex items-center gap-1 text-xs font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-full border border-orange-100 uppercase tracking-wider ml-auto md:ml-0">
+                    <Flame className="w-4 h-4" /> {project.downloadsCount}+ Students Downloaded
+                  </span>
+                )}
             </div>
             <h1 className="text-3xl md:text-5xl font-black text-slate-900 leading-tight mb-6">
               {project.title}
@@ -92,7 +103,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             </p>
           </div>
 
-          {/* Video Section */}
+          {/* YouTube Video Section */}
           {embedUrl && (
             <div className="bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
               <div className="aspect-video w-full">
@@ -101,13 +112,14 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                   src={embedUrl}
                   title="Project Demo"
                   frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 ></iframe>
               </div>
             </div>
           )}
 
-          {/* Features */}
+          {/* Features Grid */}
           <div className="bg-white p-8 md:p-10 rounded-3xl border border-gray-200 shadow-sm">
             <h2 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-2">
               <Tag className="text-blue-600 w-6 h-6" /> Key Project Features
@@ -123,11 +135,12 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Sticky Card */}
+        {/* RIGHT COLUMN: The Pricing Card */}
         <div className="lg:col-span-1">
           <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-xl sticky top-24">
             
-            <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100 relative">
+            {/* Price Area */}
+            <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100 relative overflow-hidden">
               {discount > 0 && (
                 <div className="absolute top-0 right-0 bg-green-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl uppercase">
                   Save {discount}%
@@ -142,7 +155,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
               </div>
             </div>
 
-            {/* WHAT'S INCLUDED: Yahan par includedItems use ho raha hai */}
+            {/* What's Included List */}
             <div className="mb-8">
               <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-green-600" /> What you will get:
@@ -161,29 +174,45 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
               </div>
             </div>
 
+            {/* Tech Stack Area */}
             <div className="mb-8">
-              <h4 className="font-bold text-slate-900 mb-3 text-xs uppercase tracking-tighter">Technology Stack</h4>
+              <h4 className="font-bold text-slate-900 mb-3 text-sm uppercase tracking-tighter">Technology Stack</h4>
               <div className="flex flex-wrap gap-2">
                 {project.techStack?.map((tech: string, index: number) => (
-                  <span key={index} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-[10px] font-black rounded-lg border border-slate-200 uppercase">
+                  <span key={index} className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-black rounded-lg border border-slate-200 uppercase">
                     {tech}
                   </span>
                 ))}
               </div>
             </div>
 
+            {/* 🔥 NAYA UPDATE: Social Proof Before Button */}
+            {project.downloadsCount > 0 && (
+              <div className="mb-4 bg-orange-50 border border-orange-100 rounded-xl p-3 text-center">
+                <p className="text-xs font-bold text-orange-700 flex items-center justify-center gap-1.5">
+                  <Users className="w-4 h-4" /> Highly in Demand! Join {project.downloadsCount}+ Students.
+                </p>
+              </div>
+            )}
+
+            {/* BUY BUTTON */}
             <a 
               href={project.paymentUrl || project.gumroadUrl} 
               target="_blank" 
-              className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-slate-900 text-white text-xl font-black py-5 px-6 rounded-2xl transition-all duration-300 shadow-lg"
+              rel="noopener noreferrer"
+              className="w-full group flex items-center justify-center gap-3 bg-blue-600 hover:bg-slate-900 text-white text-xl font-black py-5 px-6 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-blue-200"
             >
-              <ShoppingCart className="w-6 h-6" /> GET SOURCE CODE
+              <ShoppingCart className="w-6 h-6 group-hover:scale-110 transition-transform" /> 
+              GET SOURCE CODE
             </a>
             
-            <div className="mt-6 text-center">
-              <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 font-bold uppercase">
-                <ShieldCheck className="w-4 h-4 text-green-500" /> Secured by Cashfree
+            <div className="mt-6 flex flex-col gap-3">
+              <div className="flex items-center justify-center gap-2 text-xs text-slate-400 font-bold">
+                <ShieldCheck className="w-4 h-4 text-green-500" /> SECURE CHECKOUT BY CASHFREE
               </div>
+              <p className="text-center text-[10px] text-slate-400 leading-tight">
+                Immediate access to download links will be provided after successful payment. For support, contact us anytime.
+              </p>
             </div>
           </div>
         </div>
