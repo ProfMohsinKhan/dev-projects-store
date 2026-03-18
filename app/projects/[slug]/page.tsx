@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CheckCircle2, ShoppingCart, PlaySquare, Clock, ShieldCheck, Tag, Flame, Users } from "lucide-react"; // Naye icons import kiye
 import { Metadata } from "next";
+import BuyButton from "@/components/BuyButton";
 
 export const revalidate = 60;
 
@@ -21,8 +22,17 @@ async function getProject(slug: string) {
   const q = query(projectsCol, where("slug", "==", slug));
   const snapshot = await getDocs(q);
   if (snapshot.empty) return null;
-  const doc = snapshot.docs[0];
-  return { id: doc.id, ...doc.data() } as any;
+  
+  const docSnapshot = snapshot.docs[0];
+  const data = docSnapshot.data();
+
+  // 🔥 ERROR FIX: Firebase Timestamp ko simple number mein convert kiya
+  return { 
+    id: docSnapshot.id, 
+    ...data,
+    createdAt: data.createdAt?.toMillis() || null,
+    updatedAt: data.updatedAt?.toMillis() || null,
+  } as any;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -196,15 +206,8 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             )}
 
             {/* BUY BUTTON */}
-            <a 
-              href={project.paymentUrl || project.gumroadUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="w-full group flex items-center justify-center gap-3 bg-blue-600 hover:bg-slate-900 text-white text-xl font-black py-5 px-6 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-blue-200"
-            >
-              <ShoppingCart className="w-6 h-6 group-hover:scale-110 transition-transform" /> 
-              GET SOURCE CODE
-            </a>
+            {/* BUY BUTTON COMPONENT */}
+            <BuyButton project={project} />
             
             <div className="mt-6 flex flex-col gap-3">
               <div className="flex items-center justify-center gap-2 text-xs text-slate-400 font-bold">

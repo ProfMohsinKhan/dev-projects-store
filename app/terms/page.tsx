@@ -32,7 +32,7 @@ export default function TermsPage() {
           <div className="space-y-8 text-slate-600 leading-relaxed">
             <section>
               <h2 className="text-xl font-bold text-slate-900 mb-3">1. Introduction</h2>
-              <p>Welcome to DevStore. By accessing our website and purchasing our digital products (source codes, project files, and documentation), you agree to be bound by these Terms and Conditions.</p>
+              <p>Welcome to DevStore, a digital initiative exclusively owned and operated by <strong>Mak Tutorials</strong>. By accessing our website and purchasing our digital products (source codes, project files, and documentation), you agree to be bound by these Terms and Conditions.</p>
             </section>
 
             <section>

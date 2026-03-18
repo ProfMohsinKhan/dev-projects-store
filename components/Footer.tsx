@@ -68,7 +68,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
-          <p>© {new Date().getFullYear()} Alley Solutions / DevStore. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} DevStore. A digital initiative operated by <strong>Mak Tutorials</strong>. All rights reserved.</p>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
             All systems operational
