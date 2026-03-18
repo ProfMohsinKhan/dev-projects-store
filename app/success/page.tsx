@@ -12,7 +12,6 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
   const params = await searchParams;
   const orderId = params.order_id;
 
-  // Agar bina order_id ke koi is page par aa jaye
   if (!orderId) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
@@ -28,11 +27,11 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
     );
   }
 
-  // 🔥 1. SECURE VERIFICATION: Cashfree se direct pucho payment status
+  // 🔥 UPDATE 1: Yahan 'links' ki jagah 'orders' kar diya hai
   const isProd = process.env.CASHFREE_ENV === "PRODUCTION";
   const cashfreeEndpoint = isProd 
-    ? `https://api.cashfree.com/pg/links/${orderId}` 
-    : `https://sandbox.cashfree.com/pg/links/${orderId}`;
+    ? `https://api.cashfree.com/pg/orders/${orderId}` 
+    : `https://sandbox.cashfree.com/pg/orders/${orderId}`;
 
   try {
     const res = await fetch(cashfreeEndpoint, {
@@ -41,18 +40,18 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
         "x-client-secret": process.env.CASHFREE_SECRET_KEY || "",
         "x-api-version": "2023-08-01",
       },
-      cache: 'no-store' // Hamesha fresh status laaye
+      cache: 'no-store' 
     });
 
-    const linkData = await res.json();
+    const orderDetails = await res.json();
 
-    // Agar payment complete NAYI hui hai (Cancelled, Pending, etc)
-    if (linkData.link_status !== "PAID") {
+    // 🔥 UPDATE 2: Yahan 'link_status' ki jagah 'order_status' kar diya hai
+    if (orderDetails.order_status !== "PAID") {
       return (
         <main className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
           <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full text-center border border-gray-200">
             <XCircle className="w-20 h-20 text-red-500 mx-auto mb-6" />
-            <h1 className="text-2xl font-black text-slate-900 mb-2">Payment {linkData.link_status || "Incomplete"}</h1>
+            <h1 className="text-2xl font-black text-slate-900 mb-2">Payment {orderDetails.order_status || "Incomplete"}</h1>
             <p className="text-slate-600 mb-8">We haven't received the payment for this order yet. If money was deducted, it will be refunded automatically.</p>
             <Link href="/" className="inline-flex items-center justify-center w-full bg-slate-900 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-colors">
               <Home className="w-5 h-5 mr-2" /> Try Again
@@ -62,7 +61,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
       );
     }
 
-    // 🔥 2. Payment pakki ho gayi! Ab Firebase se Project ID nikalo
+    // Payment Verified! Ab database se project details nikalte hain
     const ordersRef = collection(db, "orders");
     const q = query(ordersRef, where("orderId", "==", orderId));
     const orderSnap = await getDocs(q);
@@ -73,14 +72,12 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
 
     const orderData = orderSnap.docs[0].data();
 
-    // 🔥 3. Project database se Google Drive Link nikalo
     const projectRef = doc(db, "projects", orderData.projectId);
     const projectSnap = await getDoc(projectRef);
     const project = projectSnap.exists() ? projectSnap.data() : null;
 
     if (!project) throw new Error("Project not found");
 
-    // 🔥 4. FINAL SUCCESS UI (Jisme Drive Link hoga)
     return (
       <main className="min-h-screen flex items-center justify-center bg-gray-50 p-4 py-12">
         <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-gray-200 animate-in fade-in zoom-in duration-500">
@@ -139,8 +136,8 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
       <main className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
         <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full text-center border border-gray-200">
           <AlertCircle className="w-20 h-20 text-red-500 mx-auto mb-6" />
-          <h1 className="text-2xl font-black text-slate-900 mb-2">Verification Failed</h1>
-          <p className="text-slate-600 mb-8">Something went wrong while verifying your payment. Please contact support.</p>
+          <h1 className="text-2xl font-black text-slate-900 mb-2">Verification Error</h1>
+          <p className="text-slate-600 mb-8">Your payment was successful, but we couldn't load the download page right now. Please contact support on WhatsApp with your Order ID.</p>
           <Link href="/" className="inline-flex items-center justify-center w-full bg-slate-900 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-colors">
             <Home className="w-5 h-5 mr-2" /> Back to Store
           </Link>
