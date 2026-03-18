@@ -16,11 +16,11 @@ export async function POST(request: Request) {
 
     const projectData = projectSnap.data();
     
-    // Order ID (Max 50 chars)
+    // Order ID generate karna (Max 50 chars)
     const shortProjectId = projectId.substring(0, 15).replace(/[^a-zA-Z0-9]/g, '');
     const orderId = `ORD_${shortProjectId}_${Date.now()}`;
 
-    // 🔥 BACK TO ORDERS API (100% Approved for your account)
+    // 🔥 MAIN FIX: Yahan "orders" hona chahiye, "links" nahi!
     const isProd = process.env.CASHFREE_ENV === "PRODUCTION";
     const cashfreeEndpoint = isProd 
       ? "https://api.cashfree.com/pg/orders" 
@@ -35,8 +35,8 @@ export async function POST(request: Request) {
         "x-client-secret": process.env.CASHFREE_SECRET_KEY!,
       },
       body: JSON.stringify({
-        order_id: orderId,
-        order_amount: projectData.price,
+        order_id: orderId,         // link_id ki jagah order_id
+        order_amount: projectData.price, // link_amount ki jagah order_amount
         order_currency: "INR",
         customer_details: {
           customer_id: `CUST_${Date.now()}`,
@@ -66,10 +66,10 @@ export async function POST(request: Request) {
       createdAt: new Date(),
     });
 
-    // 🔥 Frontend ko ab "Session ID" bhejenge
+    // Frontend ko Session ID return kijiye taaki Cashfree SDK popup khol sake
     return NextResponse.json({ 
       payment_session_id: cashfreeData.payment_session_id,
-      environment: isProd ? "production" : "sandbox" // Nayi line add ki hai
+      environment: isProd ? "production" : "sandbox" 
     });
 
   } catch (error) {
