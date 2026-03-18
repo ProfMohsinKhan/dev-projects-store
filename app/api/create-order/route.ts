@@ -7,7 +7,6 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { projectId, customerName, customerEmail, customerPhone } = body;
 
-    // 1. Firebase se original price fetch karo
     const projectRef = doc(db, "projects", projectId);
     const projectSnap = await getDoc(projectRef);
 
@@ -17,15 +16,15 @@ export async function POST(request: Request) {
 
     const projectData = projectSnap.data();
     
-    // Order ID generate karna
-// Order ID generate karna (Max 50 characters limit fix)
-    const shortProjectId = projectId.substring(0, 15).replace(/[^a-zA-Z0-9]/g, ''); // Project ID ko chhota kiya
-    const linkId = `ORD_${shortProjectId}_${Date.now()}`;
-    // 2. 🔥 UPDATE: Cashfree "Payment Links" API (Jo direct URL deta hai)
+    // Order ID (Max 50 chars)
+    const shortProjectId = projectId.substring(0, 15).replace(/[^a-zA-Z0-9]/g, '');
+    const orderId = `ORD_${shortProjectId}_${Date.now()}`;
+
+    // 🔥 BACK TO ORDERS API (100% Approved for your account)
     const isProd = process.env.CASHFREE_ENV === "PRODUCTION";
     const cashfreeEndpoint = isProd 
-      ? "https://api.cashfree.com/pg/links" 
-      : "https://sandbox.cashfree.com/pg/links";
+      ? "https://api.cashfree.com/pg/orders" 
+      : "https://sandbox.cashfree.com/pg/orders";
 
     const cashfreeResponse = await fetch(cashfreeEndpoint, {
       method: "POST",
@@ -36,18 +35,17 @@ export async function POST(request: Request) {
         "x-client-secret": process.env.CASHFREE_SECRET_KEY!,
       },
       body: JSON.stringify({
-        link_id: linkId,
-        link_amount: projectData.price,
-        link_currency: "INR",
-        link_purpose: `Payment for ${projectData.title}`.substring(0, 255), // Max 255 chars allowed
+        order_id: orderId,
+        order_amount: projectData.price,
+        order_currency: "INR",
         customer_details: {
+          customer_id: `CUST_${Date.now()}`,
           customer_name: customerName || "Student",
           customer_email: customerEmail || "student@example.com",
           customer_phone: customerPhone || "9999999999",
         },
-        link_meta: {
-          // Payment hone ke baad Success Page par bhejo
-          return_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/success?order_id={link_id}`,
+        order_meta: {
+          return_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/success?order_id={order_id}`,
         },
       }),
     });
@@ -59,9 +57,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: cashfreeData.message || "Payment gateway error" }, { status: 500 });
     }
 
-    // 3. Database mein ek temporary order save kar lo track karne ke liye
     await addDoc(collection(db, "orders"), {
-      orderId: linkId,
+      orderId: orderId,
       projectId: projectId,
       projectTitle: projectData.title,
       amount: projectData.price,
@@ -69,9 +66,10 @@ export async function POST(request: Request) {
       createdAt: new Date(),
     });
 
-    // 4. 🔥 Frontend ko Link return karo
+    // 🔥 Frontend ko ab "Session ID" bhejenge
     return NextResponse.json({ 
-      payment_url: cashfreeData.link_url // Cashfree ne Link bana diya!
+      payment_session_id: cashfreeData.payment_session_id,
+      environment: isProd ? "production" : "sandbox" // Nayi line add ki hai
     });
 
   } catch (error) {
