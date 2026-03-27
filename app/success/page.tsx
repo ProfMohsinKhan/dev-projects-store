@@ -2,7 +2,10 @@ import { db } from "@/lib/firebase";
 import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
 import { CheckCircle, Download, Home, AlertCircle, ExternalLink, XCircle } from "lucide-react";
+import { updateDoc } from "firebase/firestore"; // 🔥 updateDoc import karna zaroori hai
+import { sendDownloadEmail } from "@/app/actions/email"; // 🔥 Apne action ko import karein
 
+    
 export const metadata = {
   title: "Payment Status | DevStore",
   robots: "noindex, nofollow",
@@ -69,7 +72,7 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
     if (orderSnap.empty) {
       throw new Error("Order not found in database");
     }
-
+const orderDoc = orderSnap.docs[0];
     const orderData = orderSnap.docs[0].data();
 
     const projectRef = doc(db, "projects", orderData.projectId);
@@ -77,7 +80,28 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
     const project = projectSnap.exists() ? projectSnap.data() : null;
 
     if (!project) throw new Error("Project not found");
-
+// 🔥 NEW EMAIL LOGIC START 🔥
+    if (project.driveLink && orderData.customerEmail && !orderData.emailSent) {
+      try {
+        // Naye parameters (orderId aur amount) pass kar rahe hain
+        const emailResult = await sendDownloadEmail(
+          orderData.customerEmail, 
+          project.title, 
+          project.driveLink,
+          orderId,               // PDF ke liye
+          orderData.amount       // PDF ke liye
+        );
+        
+        if (emailResult.success) {
+          await updateDoc(orderDoc.ref, {
+            emailSent: true
+          });
+        }
+      } catch (emailError) {
+        console.error("Failed to send automated email:", emailError);
+      }
+    }
+    // 🔥 NEW EMAIL LOGIC END 🔥
     return (
       <main className="min-h-screen flex items-center justify-center bg-gray-50 p-4 py-12">
         <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-gray-200 animate-in fade-in zoom-in duration-500">

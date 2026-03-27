@@ -62,6 +62,7 @@ export async function POST(request: Request) {
       projectId: projectId,
       projectTitle: projectData.title,
       amount: projectData.price,
+      customerEmail: customerEmail,
       status: "PENDING",
       createdAt: new Date(),
     });
