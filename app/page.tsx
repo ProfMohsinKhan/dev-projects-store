@@ -1,7 +1,8 @@
 import { db } from "../lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { Zap } from "lucide-react"; 
-import ProjectGrid from "../components/ProjectGrid"; // Naya component import kiya
+import ProjectGrid from "../components/ProjectGrid";
+import { Suspense } from "react"; // 🔥 1. Yahan Suspense import kiya
 
 export const revalidate = 60;
 
@@ -43,8 +44,10 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ✨ Yahan humne Client Component daal diya jisme Search aur Pagination hai */}
-      <ProjectGrid initialProjects={projects} />
+      {/* 🔥 2. Yahan ProjectGrid ko Suspense se wrap kar diya */}
+      <Suspense fallback={<div className="text-center py-20 font-bold text-slate-500">Loading Projects...</div>}>
+        <ProjectGrid initialProjects={projects} />
+      </Suspense>
       
     </main>
   );
